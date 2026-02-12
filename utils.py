@@ -66,7 +66,7 @@ def show_main_menu():
 
 def show_rules():
     clear_screen()
-    print_header("MANUAL DE REGRAS V2.5")
+    print_header("MANUAL DE REGRAS")
     
     print(f"{Colors.MAGENTA}DINÂMICA DE COMBATE:{Colors.RESET}")
     print("Cada rodada começa com um Jo-Ken-Po. Vencer garante vantagens cruciais!\n")
