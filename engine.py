@@ -3,7 +3,7 @@ import random
 from utils import Colors, clear_screen, print_header, print_dice, print_health_bar
 from config import Move
 from models import DicePool
-from characters import Ryu, Ken, ChunLi, Guile, Zangief
+from characters import Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega
 from ai import AIPlayer
 
 def get_player_move():
@@ -238,7 +238,8 @@ def battle_loop(player_char, cpu_controller):
 
 # --- FUNÇÕES DE MENU (Mantidas iguais, só para garantir o import correto) ---
 def select_character(prompt="Escolha"):
-    chars = [Ryu, Ken, ChunLi, Guile, Zangief]
+    # Lista atualizada com os 8 personagens
+    chars = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega]
     print_header(prompt)
     for i, c in enumerate(chars, 1):
         temp = c()
@@ -258,7 +259,7 @@ def run_pve_custom():
 
 def run_tournament():
     p1 = select_character("CAMPEÃO")
-    roster = [Ryu, Ken, ChunLi, Guile, Zangief]
+    roster = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega]
     enemies = [cls() for cls in roster if cls().__class__.__name__ != p1.__class__.__name__]
     random.shuffle(enemies)
     for i, enemy in enumerate(enemies, 1):
