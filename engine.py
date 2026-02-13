@@ -3,7 +3,7 @@ import random
 from utils import Colors, clear_screen, print_header, print_dice, print_health_bar
 from config import Move
 from models import DicePool
-from characters import Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega
+from characters import Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega, EHonda, Dhalsim, MBison, Akuma
 from ai import AIPlayer
 
 def get_player_move():
@@ -238,16 +238,18 @@ def battle_loop(player_char, cpu_controller):
 
 # --- FUNÇÕES DE MENU (Mantidas iguais, só para garantir o import correto) ---
 def select_character(prompt="Escolha"):
-    # Lista atualizada com os 8 personagens
-    chars = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega]
+    # Lista atualizada com os 8 personagens def select_character(prompt="Escolha seu lutador"):
+    # Lista completa 4.0
+    chars = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega, EHonda, Dhalsim]
     print_header(prompt)
     for i, c in enumerate(chars, 1):
         temp = c()
-        print(f"{i}. {temp.name}")
+        print(f"{i}. {temp.name:<10}")
     try:
-        idx = int(input("\nEscolha: ")) - 1
-        return chars[idx]() if 0 <= idx < len(chars) else Ryu()
-    except: return Ryu()
+        idx = int(input("\nOpção: ")) - 1
+        if 0 <= idx < len(chars): return chars[idx]()
+    except: pass
+    return Ryu()
 
 def run_pve_custom():
     p1 = select_character("JOGADOR 1")
@@ -258,18 +260,83 @@ def run_pve_custom():
     input()
 
 def run_tournament():
-    p1 = select_character("CAMPEÃO")
-    roster = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega]
-    enemies = [cls() for cls in roster if cls().__class__.__name__ != p1.__class__.__name__]
-    random.shuffle(enemies)
-    for i, enemy in enumerate(enemies, 1):
+    # 1. Seleção de Personagem
+    p1 = select_character("ESCOLHA SEU PERSONAGEM")
+    
+    # 2. Seleção de Dificuldade
+    clear_screen()
+    print_header("DIFICULDADE DO TORNEIO")
+    print("1. NORMAL (Recupera TODA vida ao vencer)")
+    print("2. DIFÍCIL (Recupera pouca vida - Estilo Arcade)")
+    diff = input(">> ")
+    
+    # 3. Preparação do Roster
+    # Bosses
+    bosses = [MBison, Akuma]
+    final_boss_class = random.choice(bosses)
+    
+    # Inimigos Comuns (Remove Bosses e o próprio Player da lista de sorteio)
+    roster_classes = [Ryu, Ken, ChunLi, Guile, Zangief, Blanka, Cammy, Vega, EHonda, Dhalsim]
+    
+    # Filtra: Não pode lutar contra si mesmo nos rounds normais (exceto se p1 for boss, mas ok)
+    common_enemies = [cls() for cls in roster_classes if cls.__name__ != p1.__class__.__name__]
+    
+    # Garante 9 lutas comuns
+    if len(common_enemies) < 9:
+        # Se faltar gente (ex: escolheu um comum), completa duplicando ou reembaralhando
+        # Mas com 10 chars comuns, se vc escolhe 1, sobram 9. Perfeito.
+        random.shuffle(common_enemies)
+        ladder = common_enemies[:9]
+    else:
+        random.shuffle(common_enemies)
+        ladder = common_enemies[:9]
+    
+    # Adiciona o Boss no final (Round 10)
+    ladder.append(final_boss_class())
+    
+    # 4. Loop do Torneio
+    total_rounds = 10
+    
+    for i, enemy in enumerate(ladder, 1):
         clear_screen()
-        print_header(f"LUTA {i}/{len(enemies)}: {enemy.name}")
+        
+        # Tela de VS
+        print_header(f"ROUND {i}/{total_rounds}")
+        if i == 10:
+            print(f"{Colors.RED}{Colors.BOLD}⚠ FINAL BOSS ⚠{Colors.RESET}")
+        
+        print(f"Oponente: {Colors.RED}{enemy.name}{Colors.RESET} (HP: {enemy.max_hp})")
+        print(f"Sua Vida: {p1.current_hp}/{p1.max_hp}")
         time.sleep(2)
-        if not battle_loop(p1, AIPlayer(enemy)):
-            print(f"{Colors.RED}PERDEU!{Colors.RESET}"); break
-        p1.heal(5); p1.special_pool = []
-        print(f"{Colors.GREEN}VENCEU! Vida recuperada.{Colors.RESET}")
-        input("[Enter]")
-    if p1.current_hp > 0: print(f"{Colors.YELLOW}CAMPEÃO!{Colors.RESET}")
-    input()
+        
+        # Batalha
+        cpu = AIPlayer(enemy)
+        win = battle_loop(p1, cpu)
+        
+        if not win:
+            clear_screen()
+            print(f"{Colors.RED}VOCÊ PERDEU NO ROUND {i} PARA {enemy.name}!{Colors.RESET}")
+            break
+        
+        # Pós-luta
+        if i < total_rounds:
+            clear_screen()
+            print(f"{Colors.GREEN}VITÓRIA NO ROUND {i}!{Colors.RESET}")
+            
+            # Cura baseada na dificuldade
+            old_hp = p1.current_hp
+            if diff == '1': # Normal
+                p1.current_hp = p1.max_hp
+                print(f"Recuperação Total: {old_hp} -> {p1.current_hp} HP")
+            else: # Difícil
+                p1.heal(5)
+                print(f"Recuperação Parcial: {old_hp} -> {p1.current_hp} HP")
+            
+            p1.special_pool = [] # Reseta especial para não chegar OP no boss
+            input("\n[Pressione Enter para a próxima luta]")
+        
+    if p1.current_hp > 0:
+        clear_screen()
+        print(f"\n{Colors.YELLOW}{Colors.BOLD}PARABÉNS! VOCÊ ZEROU O MODO TORNEIO!{Colors.RESET}")
+        print(f"Campeão: {p1.name}")
+    input("[Enter para menu]")
