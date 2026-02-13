@@ -78,12 +78,12 @@ def show_rules():
     print(f"   {Colors.CYAN}★ SE VENCER (vs Tesoura):{Colors.RESET}")
     print("     - Você ganha a Iniciativa (ataca primeiro).")
     print("     - Após o Combo, você pode realizar um ESPECIAL extra.")
-    print("       (Nota: O especial extra ainda consome 1 dado guardado).")
+    print("       (Nota: O especial extra ainda consome dados guardados).")
     
     # --- PAPEL ---
     print(f"\n{Colors.BLUE}2. PAPEL (Foco: Sobrevivência){Colors.RESET}")
     print(f"   {Colors.BOLD}AÇÃO PADRÃO:{Colors.RESET} Tenta realizar um ESPECIAL.")
-    print("   - Consome 1 dado guardado na reserva.")
+    print("   - Consome dados guardados na reserva.")
     print(f"   {Colors.CYAN}★ SE VENCER (vs Pedra):{Colors.RESET}")
     print("     - BLOQUEIO TOTAL: O combo do inimigo causa 0 de dano.")
     print("     - REGENERAÇÃO: Você recupera +2 de Vida.")
@@ -101,9 +101,10 @@ def show_rules():
     # --- EMPATE ---
     print(f"\n{Colors.YELLOW}⚠ EM CASO DE EMPATE (Ex: Pedra vs Pedra){Colors.RESET}")
     print("   1. Ninguém recebe o bônus de vitória.")
-    print("   2. A ordem de turno é definida pela VELOCIDADE (Speed) dos lutadores.")
+    print("   2. A ordem de turno é definida pela AGILIDADE (Agi) dos lutadores.")
     print("   3. O personagem mais rápido age primeiro. O outro age em seguida")
     print("      (se ainda estiver vivo).")
+    print("   4. Em caso de AGILIDADE iguais, o jogador tem prioridade.")
     
     input("\n[Pressione Enter para voltar]")
 
@@ -112,7 +113,7 @@ def show_characters_info(char_list):
     print_header("LUTADORES & ESPECIAIS")
     for c in char_list:
         char = c()
-        print(f"{Colors.BOLD}{char.name}{Colors.RESET} (HP: {char.max_hp} | Spd: {char.speed})")
+        print(f"{Colors.BOLD}{char.name}{Colors.RESET} (HP: {char.max_hp} | Agi: {char.speed})")
         print(f"{Colors.WHITE}Combos:{Colors.RESET} {char.combo_desc}")
         print(f"{Colors.YELLOW}Especial:{Colors.RESET} {char.special_desc}")
         print("-" * 50)
